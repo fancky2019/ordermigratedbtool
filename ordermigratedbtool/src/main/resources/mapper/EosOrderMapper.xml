@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onlyedu.ordermigratedbtool.dao.EosOrderMapper">
+    <!--  <resultMap id="BaseResultMap" type="com.onlyedu.ordermigratedbtool.model.entity.EosOrder">-->
+    <!--    <constructor>-->
+    <!--      <idArg column="Id" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
+    <!--      <arg column="OrderNo" javaType="java.lang.String" jdbcType="NVARCHAR" />-->
+    <!--      <arg column="EosStudentID" javaType="java.lang.String" jdbcType="NVARCHAR" />-->
+    <!--      <arg column="FeeContent" javaType="java.lang.String" jdbcType="NVARCHAR" />-->
+    <!--      <arg column="OrderTime" javaType="java.time.LocalDateTime" jdbcType="TIMESTAMP" />-->
+    <!--      <arg column="CourseProductName" javaType="java.lang.String" jdbcType="NVARCHAR" />-->
+    <!--      <arg column="OrderBalance" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />-->
+    <!--      <arg column="RemainRemaining" javaType="java.math.BigDecimal" jdbcType="DECIMAL" />-->
+    <!--      <arg column="RelativeState" javaType="java.lang.Boolean" jdbcType="BIT" />-->
+    <!--      <arg column="OrderHeadID" javaType="java.lang.Integer" jdbcType="INTEGER" />-->
+    <!--    </constructor>-->
+    <!--  </resultMap>-->
+
+
+    <update id="updateRelativeBatch" parameterType="java.util.List">
+        update NewClassesAdmin.dbo.EosOrder
+        set
+        RelativeState = 1
+        where Id in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateUnRelativeBatch" parameterType="java.util.List">
+        update NewClassesAdmin.dbo.EosOrder
+        set
+        RelativeState = 0
+        where Id in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <insert id="insert" parameterType="com.onlyedu.ordermigratedbtool.model.entity.EosOrder">
+        insert into EosOrder (Id, OrderNo, EosStudentID,
+                              FeeContent, OrderTime,CourseProductID,CourseProductName,
+                              OrderBalance, RemainBalance, RelativeState,
+                              OrderHeadID)
+        values (#{id,jdbcType=INTEGER}, #{orderNo,jdbcType=NVARCHAR}, #{eosStudentID,jdbcType=INTEGER},
+                #{feeContent,jdbcType=NVARCHAR}, #{orderTime,jdbcType=TIMESTAMP},
+                #{courseProductID,jdbcType=INTEGER},  #{courseProductName,jdbcType=NVARCHAR},
+                #{orderBalance,jdbcType=DECIMAL}, #{remainBalance,jdbcType=DECIMAL}, #{relativeState,jdbcType=BIT},
+                #{orderHeadID,jdbcType=INTEGER})
+    </insert>
+
+    <select id="selectByPrimaryKey" resultType="com.onlyedu.ordermigratedbtool.model.entity.EosOrder">
+        SELECT ID,OrderNo,
+               EosStudentID,
+               FeeContent,
+               OrderTime,
+               CourseProductID,
+               CourseProductName,
+               OrderBalance,
+               RemainBalance
+        FROM [NewClassesAdmin].[dbo].[EosOrder]
+        where Id =#{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByIds" parameterType="java.util.List"
+            resultType="com.onlyedu.ordermigratedbtool.model.entity.EosOrder">
+        SELECT ID,OrderNo,
+        EosStudentID,
+        FeeContent,
+        OrderTime,
+        CourseProductID,
+        CourseProductName,
+        OrderBalance,
+        RemainBalance
+        FROM [NewClassesAdmin].[dbo].[EosOrder]
+        where Id in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getAll" resultType="com.onlyedu.ordermigratedbtool.model.entity.EosOrder">
+        SELECT OrderNo,
+               EosStudentID,
+               FeeContent,
+               OrderTime,
+               CourseProductID,
+               CourseProductName,
+               OrderBalance,
+               RemainBalance
+        FROM [NewClassesAdmin].[dbo].[EosOrder]
+    </select>
+
+    <insert id="batchInsert" parameterType="com.onlyedu.ordermigratedbtool.model.entity.EosOrder">
+        insert into EosOrder (OrderNo, EosStudentID,
+        FeeContent, OrderTime,CourseProductID, CourseProductName,
+        OrderBalance, RemainBalance
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orderNo,jdbcType=NVARCHAR}, #{item.eosStudentID,jdbcType=INTEGER},
+            #{item.feeContent,jdbcType=NVARCHAR}, #{item.orderTime,jdbcType=TIMESTAMP},
+            #{item.courseProductID,jdbcType=INTEGER}, #{item.courseProductName,jdbcType=NVARCHAR},
+            cast(#{item.orderBalance,jdbcType=DECIMAL} as decimal(18,2)),
+            cast( #{item.remainBalance,jdbcType=DECIMAL} as decimal(18,2))
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="getEosOrdersByStudentId" parameterType="com.onlyedu.ordermigratedbtool.model.dto.EosOrderDto"
+            resultType="com.onlyedu.ordermigratedbtool.model.dto.EosOrderDto">
+        select *
+        from (
+                 select ROW_NUMBER() over(order by (select 0) ) as RowNum,*
+                 from (
+                          select  * ,	case when OrderHeadProductIds is null then '未关联'
+                                              else  '已关联'
+                              end RelativeStateStr,
+                                  case when OrderHeadProductIds is null then 0
+                                       else  1
+                                      end RelativeState
+                          from (
+
+                                   select eo.[Id],
+                                          eo.[OrderNo],
+                                          eo.[EosStudentID],
+                                          eo.[FeeContent],
+                                          eo.[OrderTime],
+                                          eo.[CourseProductID],
+                                          eo.[CourseProductName],
+                                          eo.[OrderBalance],
+                                          eo.[RemainBalance],
+                                          (
+                                              select oh.OrderNo + ','
+                                              from NewClassesAdmin.dbo.RelativeOrder ro
+                                                       join NewClassesAdmin.dbo.OrderHead oh on ro.OrderHeadId = oh.Id
+                                              where ro.EosOrderId = eo.Id and ro.EosOrderProductId=eo.CourseProductID
+                                       FOR XML PATH ('')
+                               ) OrderHeadOrderNos,
+                               (
+                                   select oh.OrderNo + ','
+                                   from NewClassesAdmin.dbo.RelativeOrder ro
+                                            join NewClassesAdmin.dbo.OrderHead oh on ro.OrderHeadId = oh.Id
+                                   where ro.EosOrderId = eo.Id and ro.EosOrderProductId=eo.CourseProductID
+                                       FOR XML PATH ('')
+                               ) OrderHeadProductIds,
+                               (
+                                   select CAST(oh.Id as nvarchar) + ','
+                                   from NewClassesAdmin.dbo.RelativeOrder ro
+                                            join NewClassesAdmin.dbo.OrderHead oh on ro.OrderHeadId = oh.Id
+                                   where ro.EosOrderId = eo.Id and ro.EosOrderProductId=eo.CourseProductID
+                                       FOR XML PATH('')
+                               ) OrderHeadIds
+                              from NewClassesAdmin.dbo.EosOrder eo
+                          where eo.EosStudentID=#{eosStudentID,jdbcType=INTEGER}
+                      )t
+
+             ) t1 )t2
+        where t2.RowNum BETWEEN (#{pageIndex,jdbcType=INTEGER}-1)*#{pageSize,jdbcType=INTEGER}+1
+          and #{pageIndex,jdbcType=INTEGER}*#{pageSize,jdbcType=INTEGER}
+
+    </select>
+
+    <select id="getEosOrderCountByStudentId" parameterType="com.onlyedu.ordermigratedbtool.model.dto.EosOrderDto"
+            resultType="java.lang.Integer">
+        select COUNT(ID)[Count]
+        from NewClassesAdmin.dbo.EosOrder
+        where EosStudentID = #{eosStudentID,jdbcType=INTEGER}
+    </select>
+
+
+</mapper>

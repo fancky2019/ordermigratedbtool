@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onlyedu.ordermigratedbtool.dao.EosStudentMapper">
+
+    <update id="updateRelative" parameterType="com.onlyedu.ordermigratedbtool.model.entity.EosStudent">
+        UPDATE [NewClassesAdmin].[dbo].[EosStudent]
+        SET [RelativeState] = #{relativeState,jdbcType=BIT}
+        WHERE Id=#{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateRelativeBatch" parameterType="java.util.List">
+        UPDATE [NewClassesAdmin].[dbo].[EosStudent] SET [RelativeState] = 1
+        where Id in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <sql id="dynamicWhere">
+        <if test="eosStudentID != null and eosStudentID !='' ">
+            and es.EosStudentID = #{eosStudentID,jdbcType=NVARCHAR}
+        </if>
+
+        <if test="studentName != null and studentName !='' ">
+            and es.StudentName LIKE '%'+#{studentName,jdbcType=NVARCHAR}+'%'
+        </if>
+        <if test="phone != null and phone !='' ">
+            and es.Phone LIKE '%'+#{phone,jdbcType=NVARCHAR}+'%'
+        </if>
+
+        <if test="grade != null">
+            and es.Grade = #{grade,jdbcType=VARCHAR}
+        </if>
+
+        <if test="relativeState != null">
+            and isnull(es.RelativeState,0) = #{relativeState,jdbcType=VARCHAR}
+        </if>
+
+    </sql>
+
+    <select id="getEosStudentCount" parameterType="com.onlyedu.ordermigratedbtool.model.dto.EosStudentDto"
+            resultType="java.lang.Integer">
+        select count(Id) [count]
+        FROM [NewClassesAdmin].[dbo].[EosStudent] es
+        where 1=1
+        <include refid="dynamicWhere"></include>
+    </select>
+
+    <select id="getEosStudentPage" resultType="com.onlyedu.ordermigratedbtool.model.dto.EosStudentDto">
+        select * from (
+        select ROW_NUMBER() over(order by (select 0) ) as RowNum,*
+        from
+        (
+        select es.ID,es.[EosStudentID],es.[StudentName] ,es.[Grade] ,es.[Phone],
+        case ISNULL( es.RelativeState ,0) when 0 then '未关联'
+        when 1 then '已关联'
+        end RelativeStateStr,ISNULL( es.RelativeState ,0) RelativeState,
+        (
+        select  ui.UserId+',' from NewClassesAdmin.dbo.UserInfo ui
+        join  NewClassesAdmin.dbo.RelativeStudent rs on ui.Id=rs.UserInfoId
+        where rs.EosStudentId=es.ID
+        FOR XML PATH('')
+        )UserInfoId,
+        (
+        select cast( ui.StudentId as nvarchar(50))+',' from NewClassesAdmin.dbo.UserInfo ui
+        join  NewClassesAdmin.dbo.RelativeStudent rs on ui.Id=rs.UserInfoId
+        where rs.EosStudentId=es.ID
+        FOR XML PATH('')
+        )UserInfoStudentIds
+        from [NewClassesAdmin].[dbo].[EosStudent] es
+        where 1=1
+        <include refid="dynamicWhere"></include>
+        ) t1
+        )t2
+        where t2.RowNum BETWEEN (#{pageIndex,jdbcType=INTEGER}-1)*#{pageSize,jdbcType=INTEGER}+1 and
+        #{pageIndex,jdbcType=INTEGER}*#{pageSize,jdbcType=INTEGER}
+    </select>
+
+    <select id="getAll" resultType="com.onlyedu.ordermigratedbtool.model.entity.EosStudent">
+        SELECT [EosStudentID], [StudentName], [Grade], [Phone]
+        FROM [NewClassesAdmin].[dbo].[EosStudent]
+    </select>
+
+    <insert id="batchInsert" parameterType="com.onlyedu.ordermigratedbtool.model.entity.EosStudent">
+        insert into EosStudent (EosStudentID, StudentName,
+        Grade, Phone
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.eosStudentID,jdbcType=INTEGER}, #{item.studentName,jdbcType=NVARCHAR},
+            #{item.grade,jdbcType=NVARCHAR}, #{item.phone,jdbcType=NVARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getEosStudentStatistics" resultType="com.onlyedu.ordermigratedbtool.model.dto.UserInfoStatisticsDto">
+
+
+        declare
+        @totalCount int  ;
+    declare
+        @relativeStateCount int  ;
+    declare
+        @unRelativeStateCount int  ;
+    set
+        @totalCount= (
+						select  count(ID) totalCount
+						       from [NewClassesAdmin].[dbo].[EosStudent]
+						 where [IsDelete]=0
+                     )
+    set @relativeStateCount= (
+							   select  count(ID) totalCount
+							           from [NewClassesAdmin].[dbo].[EosStudent]
+							   where [IsDelete]=0
+							         and isnull(RelativeState,0)=1
+							  )
+    set @unRelativeStateCount= (
+								 select  count( Id) totalCount
+								         from [NewClassesAdmin].[dbo].[EosStudent]
+								 where [IsDelete]=0
+								       and isnull(RelativeState,0)=0
+                               )
+
+        select @totalCount           totalCount,
+               @relativeStateCount   relativeStateCount,
+               @unRelativeStateCount unRelativeStateCount;
+    </select>
+
+    <select id="getGrade" resultType="java.lang.String">
+        select distinct isnull([Grade],'') Grade
+        from [NewClassesAdmin].[dbo].[EosStudent]
+    </select>
+
+
+    <select id="getEosStudentById" parameterType="java.lang.Integer"
+            resultType="com.onlyedu.ordermigratedbtool.model.entity.EosStudent">
+        select *
+        from [NewClassesAdmin].[dbo].[EosStudent]
+        where Id=#{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="getEosStudentByIdWithRelative" parameterType="java.lang.Integer"
+            resultType="com.onlyedu.ordermigratedbtool.model.dto.EosStudentDto">
+        select es.ID,es.[EosStudentID],es.[StudentName] ,es.[Grade] ,es.[Phone],
+               case ISNULL( es.RelativeState ,0) when 0 then '未关联'
+                                                 when 1 then '已关联'
+                   end RelativeStateStr,ISNULL( es.RelativeState ,0) RelativeState,
+               (
+                   select  ui.UserId+',' from NewClassesAdmin.dbo.UserInfo ui
+                                                  join  NewClassesAdmin.dbo.RelativeStudent rs on ui.Id=rs.UserInfoId
+                   where rs.EosStudentId=es.ID
+            FOR XML PATH('')
+            )UserInfoId ,
+            (
+        select cast( ui.StudentId as nvarchar(50))+',' from NewClassesAdmin.dbo.UserInfo ui
+            join  NewClassesAdmin.dbo.RelativeStudent rs on ui.Id=rs.UserInfoId
+        where rs.EosStudentId=es.ID
+            FOR XML PATH('')
+            )UserInfoStudentIds
+        from [NewClassesAdmin].[dbo].[EosStudent] es
+        where es.EosStudentID=#{eosStudentID,jdbcType=INTEGER}
+    </select>
+
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onlyedu.ordermigratedbtool.dao.UserRemarksMapper">
+
+  <insert id="batchInsert" parameterType="com.onlyedu.ordermigratedbtool.model.entity.UserRemarks">
+    insert into [NewClassesAdmin].[dbo].UserRemarks ( StudentId, UserIntentionId, AddBy, Remarks)
+    values
+    <foreach collection="list" item="item" separator=",">
+           (#{item.studentId,jdbcType=CHAR}, #{item.userIntentionId,jdbcType=CHAR},
+            #{item.addBy,jdbcType=VARCHAR},  #{item.remarks,jdbcType=LONGNVARCHAR})
+    </foreach>
+  </insert>
+
+<!--  <update id="updateByPrimaryKey" parameterType="com.onlyedu.ordermigratedbtool.model.entity.UserRemarks">-->
+<!--    update UserRemarks-->
+<!--    set StudentId = #{studentId,jdbcType=CHAR},-->
+<!--      NextRemarksTime = #{nextRemarksTime,jdbcType=TIMESTAMP},-->
+<!--      UserIntentionId = #{userIntentionId,jdbcType=CHAR},-->
+<!--      BMlevel = #{BMlevel,jdbcType=INTEGER},-->
+<!--      RemarkType = #{remarkType,jdbcType=INTEGER},-->
+<!--      recordId = #{recordId,jdbcType=VARCHAR},-->
+<!--      IsNoticeCustomDirector = #{isNoticeCustomDirector,jdbcType=BIT},-->
+<!--      AddBy = #{addBy,jdbcType=VARCHAR},-->
+<!--      AddedTime = #{addedTime,jdbcType=TIMESTAMP},-->
+<!--      IsDelete = #{isDelete,jdbcType=BIT},-->
+<!--      DeleteBy = #{deleteBy,jdbcType=VARCHAR},-->
+<!--      DeleteTime = #{deleteTime,jdbcType=TIMESTAMP},-->
+<!--      IsModify = #{isModify,jdbcType=BIT},-->
+<!--      ModifyBy = #{modifyBy,jdbcType=VARCHAR},-->
+<!--      ModifyTime = #{modifyTime,jdbcType=TIMESTAMP},-->
+<!--      Action = #{action,jdbcType=INTEGER},-->
+<!--      warinType = #{warinType,jdbcType=VARCHAR},-->
+<!--      Advise = #{advise,jdbcType=INTEGER},-->
+<!--      ActionTime = #{actionTime,jdbcType=TIMESTAMP},-->
+<!--      RemarksType = #{remarksType,jdbcType=INTEGER}-->
+<!--    where Id = #{id,jdbcType=INTEGER}-->
+<!--  </update>-->
+</mapper>
