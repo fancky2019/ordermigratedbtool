@@ -77,7 +77,7 @@ public class EosStudentService {
 //                autoRelative();
 //            });
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -95,7 +95,7 @@ public class EosStudentService {
         } catch (Exception ex) {
             message.setCode(500);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("",ex);
         }
         return message;
 
@@ -134,7 +134,7 @@ public class EosStudentService {
         } catch (Exception ex) {
             message.setCode(500);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("",ex);
         }
         return message;
     }
@@ -148,7 +148,7 @@ public class EosStudentService {
             messageResult.setData(result);
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -162,7 +162,7 @@ public class EosStudentService {
             messageResult.setData(result);
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -175,7 +175,7 @@ public class EosStudentService {
 //            Integer result = userInfoMapper.updateRelative(userInfo);
 //            messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }

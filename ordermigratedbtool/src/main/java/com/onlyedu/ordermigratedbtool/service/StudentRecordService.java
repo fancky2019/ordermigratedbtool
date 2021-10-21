@@ -162,7 +162,7 @@ public class StudentRecordService {
                     callInRecordList.add(callInRecord);
                 } catch (Exception ex) {
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                    logger.error(ex.toString());
+                    logger.error("",ex);
                     messageResult.setCode(500);
                     messageResult.setMessage(ex.getMessage());
                     return messageResult;
@@ -246,7 +246,7 @@ public class StudentRecordService {
             logger.debug(importCountStr);
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }

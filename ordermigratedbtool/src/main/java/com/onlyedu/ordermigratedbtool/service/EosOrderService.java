@@ -81,7 +81,7 @@ public class EosOrderService {
 
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -119,7 +119,7 @@ public class EosOrderService {
         } catch (Exception ex) {
             message.setCode(500);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("",ex);
         }
         return message;
     }
@@ -140,7 +140,7 @@ public class EosOrderService {
             messageResult.setData(userInfoStatisticsDto);
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
