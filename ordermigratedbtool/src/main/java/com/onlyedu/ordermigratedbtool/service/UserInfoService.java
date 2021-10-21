@@ -70,7 +70,7 @@ public class UserInfoService {
         } catch (Exception ex) {
             message.setCode(500);
             message.setMessage(ex.getMessage());
-            logger.error(ex.toString());
+            logger.error("", ex);
         }
         return message;
     }
@@ -122,7 +122,7 @@ public class UserInfoService {
             messageResult.setCode(0);
         } catch (Exception e) {
 
-            logger.error(e.toString());
+            logger.error("", e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
             // 手动回滚
@@ -190,8 +190,7 @@ public class UserInfoService {
             }
             messageResult.setCode(0);
         } catch (Exception e) {
-
-            logger.error(e.toString());
+            logger.error("", e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
             // 手动回滚
@@ -218,7 +217,7 @@ public class UserInfoService {
             messageResult.setData(result);
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -232,7 +231,7 @@ public class UserInfoService {
             messageResult.setData(result);
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -246,7 +245,7 @@ public class UserInfoService {
             messageResult.setData(result);
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -271,7 +270,7 @@ public class UserInfoService {
             messageResult.setData(userInfoVOList);
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
@@ -323,7 +322,7 @@ public class UserInfoService {
             }
             messageResult.setCode(0);
         } catch (Exception e) {
-            logger.error(e.toString());
+            logger.error("",e);
             messageResult.setCode(500);
             messageResult.setMessage(e.getMessage());
         }
